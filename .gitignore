@@ -1,7 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-### My custom template
-.idea
-
 ### Java template
 # Compiled class file
 *.class
@@ -54,3 +51,6 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
+### My custom template
+.idea
+/.idea/vcs.xml
