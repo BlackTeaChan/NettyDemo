@@ -10,11 +10,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
-  *  
-  * Netty中，通讯的双方建立连接后，会把数据按照ByteBuf的方式进行传输， 
-  * 例如http协议中，就是通过HttpRequestDecoder对ByteBuf数据流进行处理，转换成http的对象。 
-  *  
-  */
+ * @author blackteachan
+ * Netty中，通讯的双方建立连接后，会把数据按照ByteBuf的方式进行传输，
+ * 例如http协议中，就是通过HttpRequestDecoder对ByteBuf数据流进行处理，转换成http的对象。
+ *
+ */
 public class TimeServer {
     private int port;
 
