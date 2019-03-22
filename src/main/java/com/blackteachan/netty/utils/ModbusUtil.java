@@ -11,7 +11,7 @@ public class ModbusUtil {
      * @param ctx 通道
      * @param cmd 命令(任意长度)，例"01 03 00 01 00 02"
      */
-    public static void sendHexCommand(ChannelHandlerContext ctx, String cmd){
+    public static void sendModbusText(ChannelHandlerContext ctx, String cmd){
         //加校验
         String xda = CRC16Util.crc(cmd);
         String[] commands = xda.split(" ");
@@ -28,13 +28,24 @@ public class ModbusUtil {
 
     /**
      * 模拟量转数字量
-     * @param Iv 模拟量
-     * @param Isl 模拟量量程低限
-     * @param Ish 模拟量量程高限
+     * @param rMin 模拟量最大值
+     * @param rMax 模拟量最小值
+     * @param aMin 量程最大值
+     * @param aMax 量程最小值
+     * @param v 模拟量
      * @return
      */
-    public static double analog2digital(double Iv, double Isl, double Ish){
-        return Iv / 65535 * Ish;
+    private double analog2digital(double rMin, double rMax, double aMin, double aMax, double v){
+        //return (rMax-rMin) * ((v-aMin)/(aMax-aMin)) + rMin;
+        //PLC 工程量范围为(最小值为Amin 最大值为 Amax); 变送器量程为 (最小量程为Rmin 最大量程为 Rmax) 当前PLC采集工程量值为X; 当前读取变送器值为Y; 解析式为：
+        return ((rMax-rMin)*(v-aMin))/(aMax-aMin)+rMin;
+        //例：S7-300/S7-400
+        //PLC 工程量范围为0~27648; 变送器量程为-20~70;
+        //当前PLC采集工程量值为13824; 求前读取变送器值为Y;
+        //Y=((70-(-20))* (13824-0))/ (27648-0)+ (-20); Y=25; 例：S7-200
+        //PLC 工程量范围为6400~32000; 变送器量程为-20~70;
+        //当前PLC采集工程量值为19200; 求前读取变送器值为Y;
+        //Y=((70-(-20))*( 19200-6400))/ (32000-6400)+ (-20); Y=25
     }
 
     /**

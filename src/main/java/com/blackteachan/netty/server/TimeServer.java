@@ -8,6 +8,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 /**
  * Netty中，通讯的双方建立连接后，会把数据按照ByteBuf的方式进行传输，
@@ -43,15 +45,18 @@ public class TimeServer {
                         }
                     })
                 .option(ChannelOption.SO_BACKLOG, 1024)
+                .handler(new LoggingHandler(LogLevel.INFO))//配置日志输出
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
-  
+
             // 绑定端口，开始接收进来的连接
             ChannelFuture f = b.bind(port).sync();
             // 等待服务器 socket 关闭 。
             f.channel().closeFuture().sync();
         } finally {
+            // 优雅退出，释放线程池资源
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
+            System.out.println("服务器优雅的释放了线程资源...");
         }
     }
       
