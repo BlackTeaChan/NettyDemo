@@ -1,8 +1,10 @@
 package com.blackteachan.netty.server;
 
+import com.blackteachan.netty.view.ServerView;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.log4j.Logger;
 
 /**
@@ -13,29 +15,35 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger log = Logger.getLogger(ServerHandler.class);
 
+    ServerHandler(){
+
+    }
+
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("SimpleServerHandler.channelRead");
-        ByteBuf result = (ByteBuf) msg;
-        byte[] result1 = new byte[result.readableBytes()];
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        try {
+            System.out.println("SimpleServerHandler.channelRead");
+            ByteBuf result = (ByteBuf) msg;
+            byte[] result1 = new byte[result.readableBytes()];
 
-        // msg中存储的是ByteBuf类型的数据，把数据读取到byte[]中
-        result.readBytes(result1);
-        String resultStr = new String(result1);
+            // msg中存储的是ByteBuf类型的数据，把数据读取到byte[]中
+            result.readBytes(result1);
+            String resultStr = new String(result1);
 
-        // 接收并打印客户端的信息
-        System.out.println("Client said:" + resultStr);
+            // 接收并打印客户端的信息
+            System.out.println("Client said:" + resultStr);
 
-        // 释放资源，这行很关键
-        result.release();
+            // 释放资源，这行很关键
+            result.release();
 
-        // 向客户端发送消息
-        String response = "hello client!";
-        // 在当前场景下，发送的数据必须转换成ByteBuf数组
-        ByteBuf encoded = ctx.alloc().buffer(4 * response.length());
-        encoded.writeBytes(response.getBytes());
-        ctx.write(encoded);
-        ctx.flush();
+            // 向客户端发送消息
+            String response = "hello client!";
+            send(ctx, response);
+        }catch (Exception e){
+            log.info("ServerHandler error: " + e);
+        }finally {
+            ReferenceCountUtil.release(msg);
+        }
     }
 
     @Override
@@ -59,6 +67,19 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
+    }
+
+    /**
+     * 发送文本到客户端
+     * @param ctx 通道
+     * @param text 文本
+     */
+    public void send(ChannelHandlerContext ctx, String text){
+        // 在当前场景下，发送的数据必须转换成ByteBuf数组
+        ByteBuf encoded = ctx.alloc().buffer(4 * text.length());
+        encoded.writeBytes(text.getBytes());
+        ctx.write(encoded);
         ctx.flush();
     }
   
