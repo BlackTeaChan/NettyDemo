@@ -20,6 +20,7 @@ public class ServerView {
     private JButton refreshButton;
     private JButton sendButton;
     private JTextArea sendTextArea;
+    private JComboBox chanelComboBox;
 
     public ServerView() {
 
@@ -71,6 +72,12 @@ public class ServerView {
 
         public abstract void onClose();
 
+    }
+
+    public static abstract class ChannelCallback{
+
+        public abstract void addChannel();
+        
     }
 
 }

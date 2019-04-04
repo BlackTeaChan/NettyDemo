@@ -37,7 +37,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             result.release();
 
             // 向客户端发送消息
-            String response = "hello client!";
+            String response = "hello client!\r\n";
             send(ctx, response);
         }catch (Exception e){
             log.info("ServerHandler error: " + e);
