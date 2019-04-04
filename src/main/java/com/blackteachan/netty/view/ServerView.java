@@ -77,7 +77,7 @@ public class ServerView {
     public static abstract class ChannelCallback{
 
         public abstract void addChannel();
-        
+
     }
 
 }
