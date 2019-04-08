@@ -20,22 +20,30 @@ public class ChannelMap {
 
     /**
      * 添加通道
-     * @param socketChannel
-     * @param client
+     * @param ctx
+     * @param s
      */
-    public static void add(ChannelHandlerContext socketChannel,String client){
-        map.put(socketChannel,client);
+    public static void add(ChannelHandlerContext ctx,String s){
+        map.put(ctx, s);
     }
 
     /**
      * 根据通道获取心跳包
-     * @param socketChannel
+     * @param ctx
      * @return
      */
-    public static String get(ChannelHandlerContext socketChannel){
-        return map.get(socketChannel);
+    public static String get(ChannelHandlerContext ctx){
+        return map.get(ctx);
     }
 
+    public static ChannelHandlerContext get(String s){
+        for (Map.Entry<ChannelHandlerContext,String> entry:map.entrySet()){
+            if (entry.getValue().equals(s)){
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
     /**
      * 获取通道数
      * @return 通道数
@@ -70,11 +78,11 @@ public class ChannelMap {
 
     /**
      * 移除通道
-     * @param socketChannel 通道
+     * @param ctx 通道
      */
-    public static void removeKey(ChannelHandlerContext socketChannel){
+    public static void remove(ChannelHandlerContext ctx){
         for (Map.Entry<ChannelHandlerContext,String> entry:map.entrySet()){
-            if (entry.getKey()==socketChannel){
+            if (entry.getKey()==ctx){
                 map.remove(entry.getKey());
             }
         }
@@ -82,13 +90,13 @@ public class ChannelMap {
 
     /**
      * 通道是否存在
-     * @param socketChannel
+     * @param ctx
      * @return 是否存在
      */
-    public static boolean isExist(ChannelHandlerContext socketChannel){
+    public static boolean isExist(ChannelHandlerContext ctx){
         boolean exist= false;
         for (Map.Entry<ChannelHandlerContext,String> entry:map.entrySet()){
-            if (entry.getKey()==socketChannel){
+            if (entry.getKey()==ctx){
                 exist= true;
             }
         }

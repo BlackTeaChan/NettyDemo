@@ -30,11 +30,9 @@ public class TimeServer {
 
     public TimeServer() {
         ServerView.setCallback(new ServerView.OnCallback() {
-            @Override
             public void onOpen(int port) {
                 startServer(port);
             }
-            @Override
             public void onClose() {
                 closeServer();
             }

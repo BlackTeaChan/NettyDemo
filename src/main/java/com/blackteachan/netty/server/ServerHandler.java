@@ -1,11 +1,13 @@
 package com.blackteachan.netty.server;
 
+import com.blackteachan.netty.map.ChannelMap;
 import com.blackteachan.netty.view.ServerView;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.log4j.Logger;
+
 
 /**
  * 服务端处理
@@ -14,9 +16,19 @@ import org.apache.log4j.Logger;
 public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     private static Logger log = Logger.getLogger(ServerHandler.class);
+    private static OnCallback mOnCallback;
 
     ServerHandler(){
-
+        ServerView.setServerHandlerCallback();
+        ServerView.setSendCallback(new ServerView.SendCallback() {
+            @Override
+            public void onSend(String rIP, String text) {
+                ChannelHandlerContext ctx = ChannelMap.get(rIP);
+                if(ctx != null) {
+                    send(ctx, text);
+                }
+            }
+        });
     }
 
     @Override
@@ -49,12 +61,16 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
+        ChannelMap.add(ctx, ctx.channel().remoteAddress().toString());
+        mOnCallback.addChannel(ctx);
         log.info(ctx.channel().remoteAddress() + " - Active");
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
+        ChannelMap.remove(ctx);
+        mOnCallback.removeChannel(ctx);
         log.info(ctx.channel().remoteAddress() + " - Inactive");
     }
 
@@ -81,6 +97,23 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         encoded.writeBytes(text.getBytes());
         ctx.write(encoded);
         ctx.flush();
+    }
+
+
+    /**
+     * 设置回调
+     * @param onCallback
+     */
+    public static void setOnCallback(OnCallback onCallback){
+        mOnCallback = onCallback;
+    }
+
+    /**
+     * 回调类
+     */
+    public static abstract class OnCallback{
+        public abstract void addChannel(ChannelHandlerContext ctx);
+        public abstract void removeChannel(ChannelHandlerContext ctx);
     }
   
 }

@@ -1,14 +1,21 @@
 package com.blackteachan.netty.view;
 
+import com.blackteachan.netty.server.ServerHandler;
 import com.blackteachan.netty.server.TimeServer;
+import io.netty.channel.ChannelHandlerContext;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class ServerView {
 
-    private static OnCallback mOnCallback;
+    private static ServerHandlerCallback mServerHandlerCallback;//ServerHandler回调
+    private static OnCallback mOnCallback;//当前类的回调
+    private static SendCallback mSendCallback;//当前类的回调
+    private static String rIP = null;
 
     private JPanel panel1;
     private JLabel label1;
@@ -23,6 +30,14 @@ public class ServerView {
     private JComboBox chanelComboBox;
 
     public ServerView() {
+        try {
+            String address = InetAddress.getLocalHost().getHostAddress().toString();
+            ipTextField.setText(address);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        mServerHandlerCallback = new ServerHandlerCallback();
 
         openButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -45,8 +60,18 @@ public class ServerView {
         });
         sendButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String s = sendTextArea.getText();
-//                mOnCallback.onSend(s);
+                if(rIP != null) {
+                    String s = sendTextArea.getText();
+                    mSendCallback.onSend(rIP, s);
+                }
+            }
+        });
+        chanelComboBox.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int index = chanelComboBox.getSelectedIndex();
+                System.out.println("select: " + index);
+                rIP = chanelComboBox.getItemAt(index).toString();
+                System.out.println(rIP);
             }
         });
     }
@@ -65,7 +90,6 @@ public class ServerView {
     public static void setCallback(final OnCallback onCallback){
         mOnCallback = onCallback;
     }
-
     public static abstract class OnCallback{
 
         public abstract void onOpen(int port);
@@ -74,10 +98,29 @@ public class ServerView {
 
     }
 
-    public static abstract class ChannelCallback{
+    public static void setSendCallback(final SendCallback sendCallback){
+        mSendCallback = sendCallback;
+    }
+    public static abstract class SendCallback{
+        public abstract void onSend(String rIP, String text);
+    }
 
-        public abstract void addChannel();
 
+    /**
+     * 设置ServerHandler回调<br/>因为ServerHandler类是在ServerView之后调用的,此方法
+     */
+    public static void setServerHandlerCallback(){
+        ServerHandler.setOnCallback(mServerHandlerCallback);
+    }
+    class ServerHandlerCallback extends ServerHandler.OnCallback{
+
+        public void addChannel(ChannelHandlerContext ctx) {
+            chanelComboBox.addItem(ctx.channel().remoteAddress().toString());
+        }
+
+        public void removeChannel(ChannelHandlerContext ctx) {
+            chanelComboBox.removeItem(ctx.channel().remoteAddress().toString());
+        }
     }
 
 }
