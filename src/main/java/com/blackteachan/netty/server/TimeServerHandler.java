@@ -13,12 +13,12 @@ import org.apache.log4j.Logger;
  * 服务端处理
  * @author blackteachan
  */
-public class ServerHandler extends ChannelInboundHandlerAdapter {
+public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
-    private static Logger log = Logger.getLogger(ServerHandler.class);
+    private static Logger log = Logger.getLogger(TimeServerHandler.class);
     private static OnCallback mOnCallback;
 
-    ServerHandler(){
+    TimeServerHandler(){
         ServerView.setServerHandlerCallback();
         ServerView.setSendCallback(new ServerView.SendCallback() {
             @Override
@@ -52,7 +52,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             String response = "hello client!\r\n";
             send(ctx, response);
         }catch (Exception e){
-            log.info("ServerHandler error: " + e);
+            log.info("TimeServerHandler error: " + e);
         }finally {
             ReferenceCountUtil.release(msg);
         }

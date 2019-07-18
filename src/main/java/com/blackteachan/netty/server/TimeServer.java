@@ -54,7 +54,7 @@ public class TimeServer {
                                 @Override
                                 public void initChannel(SocketChannel ch) throws Exception {
                                     // 注册handler
-                                    ch.pipeline().addLast(new ServerHandler());
+                                    ch.pipeline().addLast(new TimeServerHandler());
                                 }
                             })
                             .option(ChannelOption.SO_BACKLOG, 1024)

@@ -1,6 +1,6 @@
 package com.blackteachan.netty.view;
 
-import com.blackteachan.netty.server.ServerHandler;
+import com.blackteachan.netty.server.TimeServerHandler;
 import com.blackteachan.netty.server.TimeServer;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -110,9 +110,9 @@ public class ServerView {
      * 设置ServerHandler回调<br/>因为ServerHandler类是在ServerView之后调用的,此方法
      */
     public static void setServerHandlerCallback(){
-        ServerHandler.setOnCallback(mServerHandlerCallback);
+        TimeServerHandler.setOnCallback(mServerHandlerCallback);
     }
-    class ServerHandlerCallback extends ServerHandler.OnCallback{
+    class ServerHandlerCallback extends TimeServerHandler.OnCallback{
 
         public void addChannel(ChannelHandlerContext ctx) {
             chanelComboBox.addItem(ctx.channel().remoteAddress().toString());
