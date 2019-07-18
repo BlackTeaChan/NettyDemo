@@ -20,22 +20,29 @@ public class ChannelMap {
 
     /**
      * 添加通道
-     * @param ctx
-     * @param s
+     * @param ctx 通道
+     * @param s 标识符
      */
     public static void add(ChannelHandlerContext ctx,String s){
+        //防止重复
+        remove(s);
         map.put(ctx, s);
     }
 
     /**
-     * 根据通道获取心跳包
-     * @param ctx
-     * @return
+     * 根据通道获取标识符
+     * @param ctx 通道
+     * @return 标识符
      */
     public static String get(ChannelHandlerContext ctx){
         return map.get(ctx);
     }
 
+    /**
+     * 根据标识符获取通道
+     * @param s 标识符
+     * @return 通道
+     */
     public static ChannelHandlerContext get(String s){
         for (Map.Entry<ChannelHandlerContext,String> entry:map.entrySet()){
             if (entry.getValue().equals(s)){
