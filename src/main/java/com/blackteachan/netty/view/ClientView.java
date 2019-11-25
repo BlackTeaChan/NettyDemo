@@ -1,24 +1,65 @@
 package com.blackteachan.netty.view;
 
-import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import com.blackteachan.netty.client.TimeClient;
+import com.blackteachan.netty.client.TimeClientHandler;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j;
 
+import javax.swing.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+@Log4j
 public class ClientView {
+    @Setter
+    private static Channel channel = null;
+
     private JPanel panel1;
-    private JTextField a19216804TextField;
-    private JTextField a18902TextField;
+    private JTextField tf_ip;
+    private JTextField tf_port;
     private JLabel label1;
     private JLabel label2;
-    private JButton connectButton;
-    private JButton disconnectButton;
-    private JButton refreshButton;
+    private JButton btn_connect;
+    private JButton btn_disconnect;
+    private JButton btn_send;
+    private JTextArea ta_send_text;
+    private JTextArea ta_show;
 
     public ClientView() {
-
-        connectButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-
+        TimeClient.setStateCallback(new TimeClientStateCallback());
+        TimeClientHandler.setCallback(new TimeClientHandlerCallback());
+        //连接
+        btn_connect.addActionListener(e -> {
+            setEnabled(btn_disconnect);
+            setDisabled(btn_connect);
+            setDisabled(tf_ip);
+            setDisabled(tf_port);
+            String ip = tf_ip.getText();
+            int port = Integer.parseInt(tf_port.getText());
+            try {
+                TimeClient.start(ip, port);
+            } catch (Exception e1) {
+                setEnabled(btn_connect);
+                setEnabled(tf_ip);
+                setEnabled(tf_port);
+                setDisabled(btn_disconnect);
+                log.error(e1.getMessage());
+            }
+        });
+        //断开连接
+        btn_disconnect.addActionListener(e -> {
+            TimeClient.shutdown();
+        });
+        //发送
+        btn_send.addActionListener(e -> {
+            if(channel != null){
+                String msg = ta_send_text.getText();
+                channel.writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
+                ta_send_text.setText("");
+                addShowText(msg);
+                log.info("发送: " + msg);
             }
         });
     }
@@ -29,5 +70,52 @@ public class ClientView {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+        //初始化按钮
+        setEnabled(btn_connect);
+        setDisabled(btn_disconnect);
+    }
+
+    private void setDisabled(JComponent jComponent){
+        jComponent.setEnabled(false);
+    }
+
+    private void setEnabled(JComponent jComponent){
+        jComponent.setEnabled(true);
+    }
+
+    private static String getBeforeLable(){
+        return "Me - " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + '\n';
+    }
+
+    public void addShowText(String text){
+        ta_show.append(getBeforeLable() + text + '\n');
+    }
+
+    class TimeClientStateCallback implements TimeClient.StateCallback {
+        @Override
+        public void connected(Channel channel) {
+            ClientView.setChannel(channel);
+            setEnabled(btn_disconnect);
+            setDisabled(btn_connect);
+            setDisabled(tf_ip);
+            setDisabled(tf_port);
+            log.info(channel.remoteAddress().toString() + "连接成功");
+        }
+        @Override
+        public void disconnected(Channel channel) {
+            ClientView.setChannel(null);
+            setEnabled(btn_connect);
+            setEnabled(tf_ip);
+            setEnabled(tf_port);
+            setDisabled(btn_disconnect);
+            log.info(channel.remoteAddress().toString() + "断开连接");
+        }
+    }
+
+    class TimeClientHandlerCallback implements TimeClientHandler.Callback{
+        @Override
+        public void receive(String string) {
+            addShowText(string);
+        }
     }
 }

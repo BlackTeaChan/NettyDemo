@@ -1,51 +1,54 @@
 package com.blackteachan.netty.client;
 
-import java.util.logging.Logger;
-
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.ReferenceCountUtil;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j;
 
+@Log4j
 public class TimeClientHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = Logger
-            .getLogger(TimeClientHandler.class.getName());
+    @Setter
+    private static Callback callback = null;
 
-    //535A584C3034
-    private byte[] tempType = new byte[]{(byte)0x53, (byte)0x5A, (byte)0x58, (byte)0x4C, (byte)0x30, (byte)0x36};
-    //020306004800CF01F92466
-//	private byte[] temp = new byte[]{(byte)0x06, (byte)0x03, (byte)0x06, (byte)0x00, (byte)0x48, (byte)0x00, (byte)0xFF
-//			, (byte)0x01, (byte)0xF9, (byte)0x24, (byte)0x66};
-    public TimeClientHandler() {
-//        byte[] req = "QUERY TIME ORDER".getBytes();
-//        firstMessage = Unpooled.buffer(req.length);
-//        firstMessage.writeBytes(req);
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+
+        String rec = msg.toString();
+        System.out.println("收到:" + rec);
+
+        try {
+            callback.receive(rec);
+        }catch (Exception e){
+            log.error("Socket客户端处理出错: " + e.getMessage());
+        }finally {
+            ReferenceCountUtil.release(msg);
+        }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        //与服务端建立连接后
-        System.out.println("客户端active");
-        ctx.writeAndFlush(Unpooled.copiedBuffer(tempType));
+        log.info(ctx.channel().remoteAddress().toString() + "激活");
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg)
-            throws Exception {
-        System.out.println("客户端收到服务器响应数据");
-        System.out.println(msg.toString());
-        //服务端返回消息后
-//        ByteBuf buf = (ByteBuf) msg;
-//        byte[] req = new byte[buf.readableBytes()];
-//        buf.readBytes(req);
-//        System.out.println("收到请求的长度是:" + req.length);
-//
-//        String strReq = bytesToHexString(req);
-//        System.out.println("收到的请求是:" + strReq);
-//        // 释放资源
-//        logger.info("接收服务器响应msg:["+msg+"]");
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        log.info(ctx.channel().remoteAddress().toString() + "闲置");
+    }
+
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
+        System.out.println("客户端收到服务器响应数据处理完成");
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        log.info("客户端异常退出");
+        cause.printStackTrace();
+        ctx.close();
     }
 
     /**
@@ -65,22 +68,7 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
         return sb.toString();
     }
 
-
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ctx.flush();
-        System.out.println("客户端收到服务器响应数据处理完成");
+    public interface Callback{
+        void receive(String string);
     }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-            throws Exception {
-        System.out.println("客户端异常退出");
-        // 释放资源
-        logger.warning("Unexpected exception from downstream:"
-                + cause.getMessage());
-        cause.printStackTrace();
-        ctx.close();
-    }
-
 }

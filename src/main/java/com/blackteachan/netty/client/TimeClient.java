@@ -2,27 +2,34 @@ package com.blackteachan.netty.client;
 
 import com.blackteachan.netty.view.ClientView;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.string.StringDecoder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.log4j.Log4j;
 
+@Log4j
 public class TimeClient {
 
-    private static final String HOST = "192.168.0.3";
-    private static final int PORT = 18902;
+//    private static final EventLoopGroup bossGroup = new NioEventLoopGroup();
+    private static EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private static Channel channel;
 
-    public void connect(int port, String host) throws Exception {
-        // 配置客户端NIO线程组
-        EventLoopGroup group = new NioEventLoopGroup();
+    private static State state = State.STOPPED;
+    @Setter
+    private static StateCallback stateCallback = null;
+
+    public static ChannelFuture start(String host, int port) throws Exception {
+        ChannelFuture f = null;
         try {
             //客户端辅助启动类 对客户端配置
             Bootstrap b = new Bootstrap();
-            b.group(group).channel(NioSocketChannel.class)
+            workerGroup = new NioEventLoopGroup();
+            b.group(workerGroup)
+                    .channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
@@ -33,13 +40,28 @@ public class TimeClient {
                         }
                     });
             //异步链接服务器 同步等待链接成功
-            ChannelFuture f = b.connect(host, port).sync();
-            //等待链接关闭
-            f.channel().closeFuture().sync();
+            f = b.connect(host, port).sync();
+            channel = f.channel();
+            state = State.RUNNING;
+            stateCallback.connected(channel);
         } finally {
-            // 优雅退出，释放NIO线程组
-            group.shutdownGracefully();
-            System.out.println("客户端优雅的释放了线程资源...");
+            if (f != null && f.isSuccess()) {
+                state = State.RUNNING;
+                log.info("Netty客户端已连接 - " + host + ":" + port);
+            } else {
+                state = State.STOPPED;
+                log.error("Netty客户端启动失败");
+            }
+        }
+        return f;
+    }
+
+    public static void shutdown(){
+        if(state.equals(State.RUNNING)) {
+            channel.close();
+            workerGroup.shutdownGracefully();
+            state = State.STOPPED;
+            stateCallback.disconnected(channel);
         }
     }
 
@@ -47,6 +69,24 @@ public class TimeClient {
 
         ClientView clientView = new ClientView();
         clientView.initView();
-        new TimeClient().connect(PORT, HOST);
+    }
+
+    public interface StateCallback{
+        void connected(Channel channel);
+        void disconnected(Channel channel);
+    }
+
+    /**
+     * 服务端状态
+     */
+    public enum State{
+        /**
+         * 运行
+         */
+        RUNNING,
+        /**
+         * 停止
+         */
+        STOPPED
     }
 }

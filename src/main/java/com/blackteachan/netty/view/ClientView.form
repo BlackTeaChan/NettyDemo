@@ -10,14 +10,21 @@
     <children>
       <scrollpane id="dbccd">
         <constraints>
-          <grid row="0" column="0" row-span="5" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+          <grid row="0" column="0" row-span="4" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
             <minimum-size width="200" height="300"/>
             <preferred-size width="200" height="300"/>
           </grid>
         </constraints>
         <properties/>
         <border type="none"/>
-        <children/>
+        <children>
+          <component id="c677a" class="javax.swing.JTextArea" binding="ta_show">
+            <constraints/>
+            <properties>
+              <editable value="false"/>
+            </properties>
+          </component>
+        </children>
       </scrollpane>
       <component id="9ecf8" class="javax.swing.JLabel" binding="label1">
         <constraints>
@@ -41,7 +48,7 @@
           <text value="Port"/>
         </properties>
       </component>
-      <component id="65144" class="javax.swing.JTextField" binding="a19216804TextField" default-binding="true">
+      <component id="65144" class="javax.swing.JTextField" binding="tf_ip">
         <constraints>
           <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="100" height="-1"/>
@@ -49,10 +56,10 @@
           </grid>
         </constraints>
         <properties>
-          <text value="192.168.0.4"/>
+          <text value="192.168.0.3"/>
         </properties>
       </component>
-      <component id="b8f81" class="javax.swing.JTextField" binding="a18902TextField" default-binding="true">
+      <component id="b8f81" class="javax.swing.JTextField" binding="tf_port">
         <constraints>
           <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <minimum-size width="100" height="-1"/>
@@ -60,10 +67,10 @@
           </grid>
         </constraints>
         <properties>
-          <text value="18902"/>
+          <text value="8080"/>
         </properties>
       </component>
-      <component id="a7bb6" class="javax.swing.JButton" binding="connectButton" default-binding="true">
+      <component id="a7bb6" class="javax.swing.JButton" binding="btn_connect">
         <constraints>
           <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -71,20 +78,33 @@
           <text value="Connect"/>
         </properties>
       </component>
-      <component id="e36a4" class="javax.swing.JButton" binding="refreshButton" default-binding="true">
+      <component id="e36a4" class="javax.swing.JButton" binding="btn_send">
         <constraints>
           <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Refresh"/>
+          <text value="send"/>
         </properties>
       </component>
-      <component id="53b23" class="javax.swing.JButton" binding="disconnectButton" default-binding="true">
+      <component id="53b23" class="javax.swing.JButton" binding="btn_disconnect">
         <constraints>
           <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <enabled value="false"/>
           <text value="Disconnect"/>
+        </properties>
+      </component>
+      <component id="a371e" class="javax.swing.JTextArea" binding="ta_send_text">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <minimum-size width="200" height="100"/>
+            <preferred-size width="200" height="100"/>
+            <maximum-size width="200" height="100"/>
+          </grid>
+        </constraints>
+        <properties>
+          <lineWrap value="true"/>
         </properties>
       </component>
     </children>
