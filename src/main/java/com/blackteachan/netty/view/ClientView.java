@@ -57,7 +57,6 @@ public class ClientView {
             if(channel != null){
                 String msg = ta_send_text.getText();
                 channel.writeAndFlush(Unpooled.copiedBuffer(msg.getBytes()));
-                ta_send_text.setText("");
                 addShowText(msg);
                 log.info("发送: " + msg);
             }
