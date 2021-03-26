@@ -39,7 +39,7 @@ public class TimeClient {
                         protected void initChannel(SocketChannel ch) throws Exception {
 
                             ch.pipeline().addLast(new StringDecoder());//设置字符串解码器
-                            ch.pipeline().addLast(new TimeClientHandler(host, port));//设置客户端网络IO处理器
+                            ch.pipeline().addLast(new TimeClientHandler());//设置客户端网络IO处理器
                         }
                     });
             //异步链接服务器 同步等待链接成功

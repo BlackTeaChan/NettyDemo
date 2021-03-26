@@ -123,6 +123,6 @@ public class ClientView {
         mSendCallback = sendCallback;
     }
     public static abstract class SendCallback{
-        public abstract void onSend(String rIP, String text);
+        public abstract void onSend(String text);
     }
 }

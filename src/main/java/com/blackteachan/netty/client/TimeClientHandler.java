@@ -15,15 +15,14 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
 
     @Setter
     private static Callback callback = null;
+    private ChannelHandlerContext serverChannel = null;
 
-    TimeClientHandler(String host, int port){
-//        ClientView.setServerHandlerCallback();
+    TimeClientHandler(){
         ClientView.setSendCallback(new ClientView.SendCallback() {
             @Override
-            public void onSend(String rIP, String text) {
-                ChannelHandlerContext ctx = ChannelMap.get(host);
-                if(ctx != null) {
-                    NettyUtil.send(ctx, text);
+            public void onSend(String text) {
+                if(serverChannel != null) {
+                    NettyUtil.send(serverChannel, text);
                 }
             }
         });
@@ -42,6 +41,12 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
         }finally {
             ReferenceCountUtil.release(msg);
         }
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.debug("channelActive");
+        serverChannel = ctx;
     }
 
     @Override

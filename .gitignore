@@ -54,4 +54,5 @@ Temporary Items
 ### My custom template
 .idea
 log
-/NettyDemo.iml
+*.iml
+/target/
