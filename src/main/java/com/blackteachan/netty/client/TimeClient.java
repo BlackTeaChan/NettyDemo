@@ -1,5 +1,6 @@
 package com.blackteachan.netty.client;
 
+import com.blackteachan.netty.constants.ClientConstants;
 import com.blackteachan.netty.view.ClientView;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -30,6 +31,7 @@ public class TimeClient {
             workerGroup = new NioEventLoopGroup();
             b.group(workerGroup)
                     .channel(NioSocketChannel.class)
+                    .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, ClientConstants.CONNECT_TIMEOUT_MILLIS)
                     .option(ChannelOption.TCP_NODELAY, true)
                     .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(65535))
                     .handler(new ChannelInitializer<SocketChannel>() {
@@ -37,7 +39,7 @@ public class TimeClient {
                         protected void initChannel(SocketChannel ch) throws Exception {
 
                             ch.pipeline().addLast(new StringDecoder());//设置字符串解码器
-                            ch.pipeline().addLast(new TimeClientHandler());//设置客户端网络IO处理器
+                            ch.pipeline().addLast(new TimeClientHandler(host, port));//设置客户端网络IO处理器
                         }
                     });
             //异步链接服务器 同步等待链接成功
@@ -64,12 +66,6 @@ public class TimeClient {
             state = State.STOPPED;
             stateCallback.disconnected(channel);
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        ClientView clientView = new ClientView();
-        clientView.initView();
     }
 
     public interface StateCallback{

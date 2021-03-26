@@ -11,6 +11,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import lombok.extern.log4j.Log4j;
 
 /**
  * Netty中，通讯的双方建立连接后，会把数据按照ByteBuf的方式进行传输，
@@ -18,6 +19,7 @@ import io.netty.handler.logging.LoggingHandler;
  * @author blackteachan
  *
  */
+@Log4j
 public class TimeServer {
 
     //EventLoopGroup是用来处理IO操作的多线程事件循环器
@@ -40,54 +42,48 @@ public class TimeServer {
     }
 
     public void startServer(final int port){
-        new Thread(new Runnable() {
-            public void run() {
-                bossGroup = new NioEventLoopGroup();
-                workerGroup = new NioEventLoopGroup();
-                try {
-                    //启动 NIO 服务的辅助启动类
-                    ServerBootstrap b = new ServerBootstrap();
-                    b.group(bossGroup, workerGroup)
-                            //配置 Channel
-                            .channel(NioServerSocketChannel.class)
-                            .childHandler(new ChannelInitializer<SocketChannel>() {
-                                @Override
-                                public void initChannel(SocketChannel ch) throws Exception {
-                                    // 注册handler
-                                    ch.pipeline().addLast(new TimeServerHandler());
-                                }
-                            })
-                            .option(ChannelOption.SO_BACKLOG, 1024)
-                            .handler(new LoggingHandler(LogLevel.INFO))//配置日志输出
-                            .childOption(ChannelOption.SO_KEEPALIVE, true);
+        new Thread(() -> {
+            bossGroup = new NioEventLoopGroup();
+            workerGroup = new NioEventLoopGroup();
+            try {
+                //启动 NIO 服务的辅助启动类
+                ServerBootstrap b = new ServerBootstrap();
+                b.group(bossGroup, workerGroup)
+                        //配置 Channel
+                        .channel(NioServerSocketChannel.class)
+                        .childHandler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            public void initChannel(SocketChannel ch) throws Exception {
+                                // 注册handler
+                                ch.pipeline().addLast(new TimeServerHandler());
+                            }
+                        })
+                        .option(ChannelOption.SO_BACKLOG, 1024)
+                        .handler(new LoggingHandler(LogLevel.INFO))//配置日志输出
+                        .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-                    // 绑定端口，开始接收进来的连接
-                    f = b.bind(port);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
+                // 绑定端口，开始接收进来的连接
+                f = b.bind(port);
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }).start();
     }
 
     public void closeServer(){
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    // 等待服务器 socket 关闭 。
-                    f.channel().closeFuture();
-                } finally {
-                    // 优雅退出，释放线程池资源
-                    workerGroup.shutdownGracefully();
-                    bossGroup.shutdownGracefully();
-                    System.out.println("服务器优雅的释放了线程资源...");
-                }
+        new Thread(() -> {
+            try {
+                // 等待服务器 socket 关闭 。
+                f.channel().closeFuture();
+            }catch (Exception e){
+                log.error("服务器关闭出错");
+            }finally {
+                // 优雅退出，释放线程池资源
+                workerGroup.shutdownGracefully();
+                bossGroup.shutdownGracefully();
+                log.info("服务器优雅的释放了线程资源...");
             }
         }).start();
-    }
-      
-    public static void main(String[] args) throws Exception {
-        new ServerView();
     }
 
 }

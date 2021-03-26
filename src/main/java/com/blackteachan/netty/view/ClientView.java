@@ -15,6 +15,8 @@ import java.util.Date;
 public class ClientView {
     @Setter
     private static Channel channel = null;
+    //当前类的回调
+    private static SendCallback mSendCallback;
 
     private JPanel panel1;
     private JTextField tf_ip;
@@ -46,12 +48,11 @@ public class ClientView {
                 setEnabled(tf_port);
                 setDisabled(btn_disconnect);
                 log.error(e1.getMessage());
+                addShowText("连接服务端出错，请检查IP端口");
             }
         });
         //断开连接
-        btn_disconnect.addActionListener(e -> {
-            TimeClient.shutdown();
-        });
+        btn_disconnect.addActionListener(e -> TimeClient.shutdown());
         //发送
         btn_send.addActionListener(e -> {
             if(channel != null){
@@ -64,7 +65,7 @@ public class ClientView {
     }
 
     public void initView(){
-        JFrame frame = new JFrame("Netty Client");
+        JFrame frame = new JFrame("Client");
         frame.setContentPane(new ClientView().panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
@@ -83,10 +84,10 @@ public class ClientView {
     }
 
     private static String getBeforeLable(){
-        return "Me - " + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + '\n';
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + '\n';
     }
 
-    public void addShowText(String text){
+    private void addShowText(String text){
         ta_show.append(getBeforeLable() + text + '\n');
     }
 
@@ -116,5 +117,12 @@ public class ClientView {
         public void receive(String string) {
             addShowText(string);
         }
+    }
+
+    public static void setSendCallback(final SendCallback sendCallback){
+        mSendCallback = sendCallback;
+    }
+    public static abstract class SendCallback{
+        public abstract void onSend(String rIP, String text);
     }
 }
