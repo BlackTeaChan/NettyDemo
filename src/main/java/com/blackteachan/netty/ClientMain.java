@@ -4,7 +4,7 @@ import com.blackteachan.netty.view.ClientView;
 
 /**
  * @author blackteachan
- * @since 2021-03-26 14:19
+ * @since 2021-03-26
  */
 public class ClientMain {
 

@@ -83,12 +83,12 @@ public class ClientView {
         jComponent.setEnabled(true);
     }
 
-    private static String getBeforeLable(){
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()) + '\n';
+    private static String getBeforeLabel(){
+        return new SimpleDateFormat("HH:mm:ss").format(new Date()) + '\n';
     }
 
     private void addShowText(String text){
-        ta_show.append(getBeforeLable() + text + '\n');
+        ta_show.append(getBeforeLabel() + text + "\n\n");
     }
 
     class TimeClientStateCallback implements TimeClient.StateCallback {
